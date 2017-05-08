@@ -1,0 +1,22 @@
+@keyframes documents_linkInserted {
+  from {
+    clip: rect(1px, auto, auto, auto);
+  }
+  to {
+    clip: rect(0px, auto, auto, auto);
+  }
+}
+
+@-webkit-keyframes documents_linkInserted {
+  from {
+    clip: rect(1px, auto, auto, auto);
+  }
+  to {
+    clip: rect(0px, auto, auto, auto);
+  }
+}
+
+a {
+  animation: documents_linkInserted 1ms;
+  -webkit-animation: documents_linkInserted 1ms;
+}

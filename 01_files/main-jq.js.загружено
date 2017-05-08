@@ -1,0 +1,1726 @@
+function callback_(e) {
+    jQuery.ajax({
+        type: "GET",
+        url: '/*{URL::site("callback")}*/',
+        success: function(e) {
+            shade_on();
+            var t = jQuery("#product_prew");
+            t.html(e), t.show(), t.css({
+                left: Math.round((jQuery(window).width() - t.width()) / 2 + jQuery(window).scrollLeft()),
+                top: Math.round((jQuery(window).height() - t.height()) / 2 + jQuery(window).scrollTop())
+            })
+        }
+    })
+}
+function refresh_captcha(){
+	var id=Math.floor(Math.random()*1000000);
+	$("img.captcha").attr("src","/captcha/default?id="+id);
+}
+function getScript() {
+    $.getScript("/widget/cart/get_cart_convead")
+}
+
+function externalAddToCart(product_code,product_name,catalog_name,brand_name,variant,price, count, product_url, product_img_link) {
+	googleAddToCart(product_code,product_name,catalog_name,brand_name,variant,price, count);
+	yandexAddToCart(product_code,product_name,catalog_name,brand_name,variant,price, count);
+	carrotAddCart(product_name, product_url,price,product_img_link);
+}
+
+function carrotAddCart(name,url,price,img) {
+	if(typeof carrotquest =='undefined') {
+		return;
+	}
+	
+	carrotquest.track('$cart_added', {
+		"$name": name,
+		"$url": url,
+		"$amount": price,
+		"$img": img,
+	});
+}
+
+function changeVariant(product_id, variant_id, el) {
+	var t = jQuery(el);
+	jQuery.ajax({
+		cache: !1,
+		url: '/cart/changevariant',
+		data: {
+			product_id: product_id,
+			variant_id: variant_id
+		}
+	}).done(function(d) {
+		if(d!='') {
+			t.parent().find('#limit-cart-message-'+product_id).remove(),
+			t.parent().prepend('<div class="limit_cart_message" id="limit-cart-message-'+product_id+'">'+d+'</div>'), 
+			$('#limit-cart-message-'+product_id).dialog({'modal':true,resizable: false})
+		}
+		else {
+			$('[data-product-id='+product_id+'] .change').text('Других вариантов нет в наличии');
+		}
+	});
+}
+
+var default_text_cart_button = 'В корзину';
+
+function addToCart(e,cb) {
+    var t = jQuery(e),
+        r = t.parents().find(".count_prod"),
+        i = t.data("product-id"),
+        s_variant = t.parents().find('.jq-radio.checked').last().attr("variant_id"),
+        a = t.parents().find(".jq-radio.checked").attr("data-color");
+	$('.limit_cart_message').remove();
+	t.text(' . . . ');
+    if (!a > 0 && (a = jQuery(".jq-radio:first").attr("data-color")), i) var o = "/cart/add/" + t.data("product-id");
+    else var o = t.attr("href");
+    o += "/" + (r.val() || 1) + "?color="+ (a || 0) +'&variant='+(s_variant || 0), jQuery.ajax({
+        cache: !1,
+        url: o
+    }).done(function(d) {
+	    if(!d && typeof cb != 'undefined') {
+		    cb()
+	    }
+	    try { rrApi.addToBasket(i) } catch(e) {}
+	    t.text(default_text_cart_button);
+	    if(d!='') {
+			t.parent().find('#limit-cart-message-'+i).remove(),
+			t.parent().prepend('<div class="limit_cart_message" id="limit-cart-message-'+i+'">'+d+'</div>'), 
+			$('#limit-cart-message-'+i).dialog({
+				'modal':true,
+				resizable: false,
+				open: function(){
+					$('.ui-widget-overlay').on('click', function(){
+						$('#limit-cart-message-'+i).dialog('destroy').remove();
+					});
+				},
+				close: function(event, ui)
+				{
+				    $(this).dialog('destroy').remove();
+				}
+			})
+	    }
+	    else {
+		getScript(),greaycart(i), refreshWidgetCart(show_cart_info);
+		if (document.readyState === 'complete' && window.location.pathname == '/cart/show') {
+			window.location.href = '/cart/show';
+			return false;
+	    }
+	    }
+    }), r.val("1");
+}
+function show_cart_info() {
+		$('.cart_show_info_top').addClass('active');
+		if(typeof show_mobile_cart_timer!='undefined') {
+			clearTimeout(show_mobile_cart_timer);
+		}
+		show_mobile_cart_timer = setTimeout(function() {
+			$('.cart_show_info_top').removeClass('active');
+		}, 5000);
+}
+function greaycart(e,cb) {
+	var t = jQuery('[data-product-id='+e+']');
+	t.addClass('not_active_product_sale').text('В корзине');
+	setTimeout(function() {
+		t.removeClass('not_active_product_sale').text(default_text_cart_button);
+	}, 2500);
+}
+
+function add2cart(e, t, r) {
+    var i = jQuery("#" + e),
+        a = jQuery("#" + t),
+        o = jQuery("#" + e + "_shadow");
+    if (i.attr("id")) {
+        if (!o.attr("id")) {
+            jQuery("body").prepend('<img id="' + i.attr("id") + '_shadow" style="display: none; background-color: #ddd; border: solid 1px darkgray; position: static; top: 0px; z-index: 100000; overflow:hidden;" src="' + i.attr("src") + '" />');
+            var o = jQuery("#" + i.attr("id") + "_shadow")
+        }
+        o || alert("Cannot create the shadow div"), o.height(i.css("height")).css("top", i.offset().top).css("left", i.offset().left).css("opacity", .4).show(), o.css("position", "absolute"), o.animate({
+            height: a.innerHeight(),
+            top: a.offset().top,
+            left: a.offset().left
+        }, {
+            duration: 1e3
+        }).animate({
+            opacity: .2
+        }, {
+            duration: 300,
+            complete: r
+        }), setTimeout("jQuery('#" + i.attr("id") + "_shadow').remove();", 1500)
+    }
+}
+
+function applyCartProductCount(ee) {
+	var max_count = parseInt($(ee).attr('max'));
+	var current_count = parseInt($(ee).val());
+	if(current_count>max_count) {
+		$(ee).val(max_count);
+	}
+    var e = jQuery("form[name=cart]"),
+        t = e.parent();
+    e && (clearTimeout(timerid), data_frm = e.serialize(), timerid = setTimeout(function() {
+        jQuery.ajax({
+            type: "post",
+            cache: !1,
+            url: "/cart/show",
+            response: "text",
+            data: data_frm,
+            success: function(e) {
+                t.replaceWith(e), refreshWidgetCart();
+            }
+        })
+    }, 700))
+}
+
+function refreshCart() {
+	jQuery.ajax({
+            type: "post",
+            cache: !1,
+            url: "/cart/show",
+            response: "text",
+            data: jQuery("form[name=cart]").serialize(),
+            success: function(e) {
+                jQuery("form[name=cart]").replaceWith(e)
+            }
+        })
+}
+
+function addCartProductCount(e) {
+    var t = $(e).parent().find(".product_count"),
+        r = parseInt(t.val());
+		changeCartProductCount(t);
+    $(e).hasClass("plus") ? t.val(r + 1) : $(e).hasClass("minus") && t.val(r - 1), applyCartProductCount(t)
+}
+
+function refreshWidgetCart(cb) {
+    jQuery.ajax({
+        cache: !1,
+        url: "/widget/cart"
+    }).done(function(e) {
+        jQuery("div#cart").replaceWith(e);
+	if(typeof cb=='function') {
+		cb();
+	}
+    })
+}
+
+function shade_on() {
+    jQuery("#shade").css({
+        display: "block",
+        width: jQuery(document).width(),
+        height: jQuery(document).height()
+    })
+}
+
+function show_product(e) {
+    jQuery.ajax({
+        url: e.href,
+        success: function(e) {
+            shade_on();
+            var t = jQuery("#product_prew");
+            t.html(e), t.show(), t.css("min-width", 700), t.css({
+                left: Math.round((jQuery(window).width() - t.width()) / 2 + jQuery(window).scrollLeft()),
+                top: Math.round((jQuery(window).height() - t.height()) / 2 + jQuery(window).scrollTop())
+            })
+        }
+    })
+}
+
+function update_products(e, t, r) {
+    jQuery("div#products-wrap").css({
+        position: "relative"
+    }), jQuery("div#products_load").css({
+        display: "block"
+    }), jQuery.ajax({
+        cache: false,
+        url: e,
+        dataType: "JSON"
+    }).then(function(i) {
+        find_item = i.tpl, window.history.pushState({count: i.count}, null, e.replace(/\?\_\=[0-9]+/,'')), window.addEventListener("popstate", function(e) {
+            e.preventDefault();
+		document.location.href=e.target.location.href;
+        }), jQuery("div#products-wrap").css({
+            position: ""
+        }), jQuery("div#products_load").css({
+            display: "none"
+        }), 1 == r ? (t(find_item)) : t(i.count)
+    }, function(e) {
+        1 == r ? (t(e.responseText)) : t(e.responseText)
+    })
+}
+function register() {
+    jQuery("#reg_popup").dialog({
+			autoOpen: true, 
+			modal: true, 
+			width: 410, 
+			draggable: false,
+			resizable: false,
+			dialogClass: 'ui-dialog-form',
+			show: {
+				effect: 'drop', 
+				duration: 400
+			},
+			hide: {
+				effect: 'drop', 
+				duration: 400
+			},
+			open: function(){
+				$('.ui-widget-overlay').on('click', function(){
+					jQuery("#reg_popup").dialog('close');
+				});
+			},
+			close: function(){
+				jQuery("#reg_popup").dialog('destroy');
+				jQuery("#reg_popup").find('input[type=text]').val('');
+			}
+		});
+		
+		return false;
+}
+function save_register() {
+	   jQuery("#save_reg_popup").dialog({
+			autoOpen: true, 
+			modal: true, 
+			width: 410, 
+			draggable: false,
+			resizable: false,
+			dialogClass: 'ui-dialog-form',
+			show: {
+				effect: 'drop', 
+				duration: 400
+			},
+			hide: {
+				effect: 'drop', 
+				duration: 400
+			},
+			open: function(){
+				$('.ui-widget-overlay').on('click', function(){
+					jQuery("#save_reg_popup").dialog('close');
+				});
+			},
+			close: function(){
+				jQuery("#save_reg_popup").dialog('destroy');
+				jQuery("#save_reg_popup").find('input[type=text]').val('');
+			}
+		});
+
+		return false;
+}
+function login() {
+	   jQuery("#login_popup").dialog({
+		autoOpen: true, 
+		modal: true, 
+		width: 300, 
+		draggable: false,
+		resizable: false,
+		dialogClass: 'ui-dialog-form',
+		show: {
+			effect: 'drop', 
+			duration: 400
+		},
+		hide: {
+			effect: 'drop', 
+			duration: 400
+		},
+		open: function(){
+			$('.ui-widget-overlay').on('click', function(){
+				jQuery("#login_popup").dialog('close');
+			});
+		},
+		close: function(){
+			jQuery("#login_popup").dialog('destroy');
+			jQuery("#login_popup").find('input[type=text]').val('');
+		}
+	});
+
+	return false;
+}
+
+function shade_on() {
+    jQuery("#shade").css({
+        display: "block",
+        width: jQuery(document).width(),
+        height: jQuery(document).height()
+    })
+}
+
+function show_product(e) {
+    jQuery.ajax({
+        url: e.href,
+        success: function(e) {
+            shade_on();
+            var t = jQuery("#product_prew");
+            t.html(e), t.show(), t.css("min-width", 700), t.css({
+                left: Math.round((jQuery(window).width() - t.width()) / 2 + jQuery(window).scrollLeft()),
+                top: Math.round((jQuery(window).height() - t.height()) / 2 + jQuery(window).scrollTop())
+            })
+        }
+    })
+}
+
+function favorites_toggle(e) {
+    jQuery.ajax({
+        type: "post",
+        cache: !1,
+        url: "/ajax/favorites_toggle",
+        response: "text",
+        data: {
+            product_id: e
+        }
+    }).success(function(t) {
+        switch (favoriteCount(), t) {
+            case "delete":
+                jQuery(".listing_favorites_" + e).removeClass("active");
+                break;
+            case "insert":
+                jQuery(".listing_favorites_" + e).hasClass("active") || (jQuery(".listing_favorites_" + e).addClass("active"), convead("event", "custom", {
+                    key: "af"
+                }));
+                break;
+            case "auth":
+                return;
+            default:
+                alert("Error add Fav")
+        }
+    })
+}
+
+function favorites_toggle_cookie(e) {
+    jQuery.ajax({
+        type: "post",
+        cache: !1,
+        url: "/ajax/favorites_toggle_cookie",
+        response: "json",
+        data: {
+            product_id: e
+        }
+    }).success(function(t) {
+        var r = jQuery.parseJSON(t);
+        switch (r.action) {
+            case "delete":
+                jQuery(".listing_favorites_" + e).removeClass("active");
+                break;
+            case "insert":
+                jQuery(".listing_favorites_" + e).hasClass("active") || jQuery(".listing_favorites_" + e).addClass("active");
+                break;
+            case "auth":
+                return;
+            default:
+                alert("Error add Fav")
+        }
+        $(".countFavorite").empty().append("(" + r.count + ")")
+    })
+}
+
+function strsearch(e) {
+    e.length > 0 ? jQuery.ajax({
+        type: "get",
+        cache: !1,
+        url: "/qsearch",
+        response: "text",
+        data: {
+            text: e
+        }
+    }).success(function(e) {
+        jQuery("#qsearch_result,.qsearch_result").replaceWith(e), jQuery("#qsearch_result,.qsearch_result").css({
+            display: "block"
+        })
+    }) : hideqSearchRes()
+}
+
+function hideqSearchRes() {
+    jQuery("#qsearch_result,.qsearch_result").css({
+        display: "none"
+    })
+}
+
+function sort_callback(e) {
+    jQuery("#update").html(e)
+}
+
+function getCookie(e) {
+    var t = document.cookie.match(new RegExp("(?:^|; )" + e.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\$1") + "=([^;]*)"));
+    return t ? decodeURIComponent(t[1]) : void 0
+}
+
+function onProductClick(e, t, r, i, a) {
+	if(window.location.hostname=='m.holyskin.ru' && a.indexOf('//holyskin.ru')) {
+  a = a.replace('holyskin.ru','m.holyskin.ru');
+ }
+	if(e=='') {
+		
+		$.ajax('/ajax/get_product_ms_code?product_id='+($('a[href="'+a+'"] img').attr('id').replace('target',''))).complete(function(data) { onProductClick(data, t, r, i, a); });
+		return false;
+	}
+ 
+    console.info("startproductclick"), ga("ec:addProduct", {
+        id: e,
+        name: t,
+        category: r,
+        brand: i
+    }), ga("ec:setAction", "click", {
+        list: "Search Results"
+    }), ga("send", "event", "UX", "click", "Results", {
+        hitCallback: function() {
+            console.info("hitCallback")
+        }
+    }), product_popup_open(a)
+}
+
+function product_popup_open(product_url, need_to_popup){
+	if(window.allow_popup_product || need_to_popup) {
+	
+		var $dialog_product =  $('.dialog-product');
+		$.ajax({
+			url: product_url, data: {}, cache: true
+		})
+		.done(function(data){
+
+			$dialog_product.html(data);
+
+			$dialog_product.dialog({
+				autoOpen: true, 
+				modal: true, 
+				width: 1040, 
+				draggable: false,
+				resizable: false,
+				dialogClass: 'ui-dialog-product',
+				show: {
+					effect: 'drop', duration: 400
+				},
+				hide: {
+					effect: 'drop', duration: 400
+				},
+				open: function(){
+
+					$('.ui-widget-overlay').on('click', function(){
+						$dialog_product.dialog('close');
+					});
+
+//					$dialog_product.find('.box-text').jScrollPane({
+//						showArrows: false,
+//						mouseWheelSpeed: 30
+//					});
+
+					chandeg_color();
+				},
+				close: function(){
+					$dialog_product.dialog('destroy').empty();
+				}
+			});
+
+		});
+	}
+	else {
+		window.open(product_url);
+	}
+}
+
+function yandexAddToCart(e, t, r, i, a, o, n, p) {
+	if(e=='' && p) {
+		
+		$.ajax('/ajax/get_product_ms_code?product_id='+p).complete(function(data) { yandexAddToCart(data, t, r, i, a, o, n); });
+		return false;
+	}
+    "?" !== a && (a = jQuery(".jq-radio.checked").text(), !a > 0 && (a = jQuery(".jq-radio:first").text())), n || (n = $(".buy").find(".num").find("input").val());
+    var u = {
+        id: e,
+        name: t,
+        category: r,
+        brand: i,
+        price: o,
+        quantity: n
+    };
+    a && (u.variant = a), window.ya_ecommerce = window.ya_ecommerce || [], window.ya_ecommerce.push({
+        ecommerce: {
+            add: {
+                products: [u]
+            }
+        }
+    }), yaCounter23406202.reachGoal('add');
+}
+
+function yandexRemoveFromCart(e, t, r, i, a, o, n) {
+    "?" !== a && (a = jQuery(".jq-radio.checked").text(), !a > 0 && (a = jQuery(".jq-radio:first").text())), console.log(this), n || (n = $(".buy").find(".num").find("input").val());
+    var u = {
+        id: e,
+        name: t,
+        category: r,
+        brand: i,
+        price: o,
+        quantity: n
+    };
+    a && (u.variant = a), window.ya_ecommerce = window.ya_ecommerce || [], window.ya_ecommerce.push({
+        ecommerce: {
+            remove: {
+                products: [u]
+            }
+        }
+    }), yaCounter23406202.reachGoal('remove');
+}
+
+function googleAddToCart(e, t, r, i, a, o, n, p) {
+	
+	if(e=='' && p) {
+		
+		$.ajax('/ajax/get_product_ms_code?product_id='+p).complete(function(data) { googleAddToCart(data, t, r, i, a, o, n); });
+		return false;
+	}
+	
+    "?" !== a && (a = jQuery(".jq-radio.checked").text(), !a > 0 && (a = jQuery(".jq-radio:first").text())), n || (n = $(".buy").find(".num").find("input").val());
+    var u = {
+        id: e,
+        name: t,
+        category: r,
+        brand: i,
+        price: o,
+        quantity: n
+    };
+    a && (u.variant = a), console.log(u), ga("ec:addProduct", u), ga("ec:setAction", "add"), ga("send", "event", "UX", "click", "add to cart")
+}
+
+function googleRemoveFromCart(e, t, r, i, a, o, n) {
+    "?" !== a && (a = jQuery(".jq-radio.checked").text(), !a > 0 && (a = jQuery(".jq-radio:first").text())), console.log(this), n || (n = $(".buy").find(".num").find("input").val());
+    var u = {
+        id: e,
+        name: t,
+        category: r,
+        brand: i,
+        price: o,
+        quantity: n
+    };
+    a && (u.variant = a), console.log(u), ga("ec:addProduct", u), ga("ec:setAction", "remove"), ga("send", "event", "UX", "click", "remove from cart")
+}
+jQuery.fn.equalizeHeights = function() {
+    var e = this.map(function(e, t) {
+        return jQuery(t).height()
+    }).get();
+    return this.css({
+        minHeight: Math.max.apply(this, e)
+    })
+}, jQuery.fn.sliceHeight = function(e) {
+    var e = jQuery.extend({
+        slice: null,
+        el: null
+    }, e);
+    e.slice && jQuery(this).each(function() {
+        for (var t = jQuery(this).find(e.el), r = 0; r < t.length; r += e.slice) jQuery(t.slice(r, r + e.slice)).equalizeHeights()
+    })
+};
+var loadFilter = function(e) {
+
+    var t = jQuery("#filter_product"),
+        r = jQuery(t).attr("action");
+    return update_products(r + "?" + t.serialize(), function(t) {
+        jQuery("#find_count").show(), jQuery("#find_count").offset({
+            top: jQuery(e).offset().top
+        }), jQuery("#find_count #count").text(t),
+	setTimeout(function() {
+		$('.widget-catalog .tabs a').each(function() {
+			if($(this).is(':visible')) {
+				var href = $(this).attr('href');
+				var parts_of_href = href.split('?');
+				var p = document.location.href.split('?');
+				$(this).attr('href',parts_of_href[0]+'?'+p[1])
+			}
+		});
+	},600);
+    }), !1
+};
+jQuery(document).ready(function() {
+    var e = jQuery("#datepicker");
+    e.get().length && e.datepicker({
+        yearRange: "-100:+0",
+	changeMonth: true,
+	changeYear: true,
+	monthNames: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+	monthNamesShort: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+	dayNamesMin: [ "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" ], 
+	dateFormat: "dd-mm-yy"
+    });
+    var e = jQuery("[name=birth_date]");
+    e.get().length && e.datepicker({
+        yearRange: "-100:+0",
+	changeMonth: true,
+	changeYear: true,
+	monthNames: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+	monthNamesShort: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+	dayNamesMin: [ "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" ], 
+	dateFormat: "dd-mm-yy"
+    });
+    var t;
+    jQuery("#header .menu li").hover(function() {
+        var e = jQuery(this);
+        1 == e.find(".box").length && (t = setTimeout(function() {
+            jQuery("#header .menu").addClass("show"), e.addClass("show")
+        }, 100))
+    }, function() {
+        1 == jQuery(this).find(".box").length && (jQuery("#header .menu").removeClass("show"), jQuery(this).removeClass("show"), clearInterval(t))
+    });
+    var r = jQuery("#content.product .photo .list");
+    r.find("ul > li").size() > 3 && r.okSlider({
+        speed: 450,
+        visible: 4,
+        rotateBy: 1,
+        carousel: !0
+    });
+    var i = jQuery("#content.product .photo");
+    jQuery(".list li", i).click(function() {
+        return jQuery(this).hasClass("cur") || (jQuery("li.cur", i).removeClass("cur"), jQuery(this).addClass("cur"), jQuery("#vvv").href = "http://yandex.ru", jQuery(".big img", i).attr("src", jQuery(this).attr("data-src")), jQuery(".big a.highslide").attr("href", jQuery(this).attr("bigimg"))), !1
+    }), jQuery(".site-content .product-detail-new  .num a").click(function() {
+        var e = jQuery(this),
+            t = jQuery("input", e.parent()),
+            r = Number(t.val()) ? Number(t.val()) : 0;
+        return e.is(".plus") ? r += 1 : r = 0 > r - 1 ? 0 : r - 1, t.val(r), !1
+    }), jQuery.fn.live = function(e, t, r) {
+        return jQuery(this.context).on(e, this.selector, t, r), this
+    }, jQuery("#info .tab a").live("click", function() {
+        var e = jQuery(this).attr("tab_id");
+        return e && (jQuery("#info .box").each(function() {
+            jQuery(this).addClass("hidden")
+        }), jQuery("#info .tab a").each(function() {
+            jQuery(this).removeClass("cur")
+        }), jQuery("#info #" + e).removeClass("hidden"), jQuery(this).addClass("cur")), !1
+    }), jQuery('input[type="checkbox"]').not('.no-style').styler(), jQuery(".slider-price").get().length && (jQuery(".slider-price")[0].slide = null, jQuery(".slider-price").slider({
+        stop: function() {
+            loadFilter(jQuery(".slider-price"))
+        },
+        range: !0,
+        min: 0,
+        max: jQuery("#end").val(),
+        step: 10,// иначе не видно самого дорого товара. Подумать как округлить количество шагов в большую сторону
+        values: [jQuery("#start").val(), jQuery("#max_value").val()],
+        slide: function(e, t) {
+            jQuery(" #start").val(t.values[0]), jQuery(" #end").val(t.values[1])
+        }
+    })),
+	jQuery('a.opislink').on('click',function(){
+	if(jQuery(this).hasClass('active')){
+		jQuery(this).parent().find('div.opis').removeClass('active');
+		jQuery(this).removeClass('active');
+		if(jQuery(this).hasClass('howdel_point')){
+			jQuery(this).html('Подробнее об условиях и сроках доставки');
+		}else if(jQuery(this).hasClass('faq_delivery_list')){
+			jQuery(this).html('Список городов и сроки доставкой курьером');			
+		}
+		else{
+			jQuery(this).html('Развернуть');
+		}		
+		return false;
+	}else{
+		jQuery(this).parent().find('div.opis').addClass('active');
+		jQuery(this).addClass('active');
+		jQuery(this).html('Свернуть');
+		return false;
+	}
+});
+}), jQuery(window).load(function() {
+    jQuery(" .product-list").sliceHeight({
+        el: "li",
+        slice: 4
+    }), jQuery(window).resize(function() {
+        jQuery(".product-list").sliceHeight({
+            el: "li",
+            slice: 4
+        })
+    })
+});
+var timerid;
+jQuery(document).on("click", "#shade", function() {
+    jQuery(".pop_up").hide(), jQuery(this).hide()
+});
+var find_item;
+jQuery(function() {
+    0 == jQuery(".jq-radio.checked").length && jQuery(".jq-radio:first").not('[data-color]').addClass("checked"), jQuery("#find_count a").click(function() {
+        return jQuery("#update").html(find_item), jQuery(this).parent().hide(), jQuery(".listing ul li").css("min-height", "367px"), jQuery(".product-list").sliceHeight({
+            el: "li",
+            slice: 4
+        }), !1
+    })
+}), jQuery.fn.equalizeHeights = function() {
+    var e = this.map(function(e, t) {
+        return jQuery(t).height()
+    }).get();
+    return this.css({
+        minHeight: Math.max.apply(this, e)
+    })
+}, jQuery.fn.sliceHeight = function(e) {
+    var e = jQuery.extend({
+        slice: null,
+        el: null
+    }, e);
+    e.slice && jQuery(this).each(function() {
+        for (var t = jQuery(this).find(e.el), r = 0; r < t.length; r += e.slice) jQuery(t.slice(r, r + e.slice)).equalizeHeights()
+    })
+}, jQuery(window).load(function() {
+    jQuery("#content .listing").sliceHeight({
+        el: "li",
+        slice: 3
+    }), jQuery(window).resize(function() {
+        jQuery("#content .listing").sliceHeight({
+            el: "li",
+            slice: 3
+        })
+    })
+}), jQuery(document).on("click", "#shade", function() {
+    jQuery(".pop_up").hide(), jQuery(this).hide()
+});
+
+$(document).ready(function() {
+	window.or = {
+		freeze: true,
+
+		Complete: function(ship_param) {
+			if(or.Check()) {
+
+				ga('ec:setAction', 'checkout_option', {
+					'step': 3,
+					'option': ship_param
+				});
+				ga('send', 'event', 'Checkout', 'Option', {
+					hitCallback: function() {
+
+					},
+				});
+
+				$('form[name="createorder"]').attr('action', '/order/create/2');
+				var form = $('form[name=createorder]');
+				// Записываем в куки время 
+				var date1 = new Date().getTime();
+				var date2 = new Date(new Date().getTime() + 60 * 1000 * 30);
+				document.cookie = "start_order=" + date1 + "; path=/; expires=" + date2.toUTCString();
+
+				if(or.Payment.type=='yandex') {
+
+					var action = form.attr('action');
+					var formdata = form.serialize();
+					$.ajax({
+						url: action,
+						data: formdata,
+						async: false,
+						type: 'post',
+						success: function(order_id) {
+							$('#yandex_kassa_form').find('[name=order_id]').val(order_id);
+							$('#yandex_kassa_form').submit();
+						}
+					})
+				}
+				else {
+					form.submit();
+				}
+			}
+		},
+		Check: function() {
+			var ready=false;
+
+			var mish = ($mish && $mish>0)?$mish:0;
+			if ((mish > 0) && (or.City.selected.id == 2))
+			{
+				alert('В Вашем заказе есть товар, который не продается в Санкт-Петербурге. Удалите его, пожалуйста');
+				location = 'cart/show';
+				return false;
+			}
+
+			$('.field_error_msg').hide();
+
+			var check_user_data = true;
+			var error_list = [];
+			
+			if($('[name=client_email]').val().length==0) {
+				error_list[error_list.length] = ["[name=client_email]", "Укажите email"];
+				//toogleError("[name=client_email]", "Укажите email", 0);
+				check_user_data=false;
+			}
+
+			if($('#phone').val().length==0) {
+			//	toogleError("#phone", "Укажите телефон", 0);
+				error_list[error_list.length] = ["#phone", "Укажите телефон"];
+				check_user_data=false;
+			}
+
+			if($('[name=client_name]').val().length==0) {
+			//	toogleError("[name=client_name]", "Укажите Ваше имя", 0);
+				error_list[error_list.length] = ["[name=client_name]", "Укажите Ваше имя"];
+				check_user_data=false;
+			}
+
+			if(!or.Delivery.selected.value) {
+			//	toogleError("#delivery_chooser-button", "Не верно указан способ доставки", or.Delivery.selected.value);
+				error_list[error_list.length] = ["#delivery_chooser-button", "Не верно указан способ доставки"];
+				check_user_data=false;
+			} else{
+				
+			}
+			if(!or.Payment.selected) {
+				//	toogleError("#payment-methods-button", "Не верно указан способ оплаты", or.Payment.selected);
+					error_list[error_list.length] = ["#payment-methods-button", "Не верно указан способ оплаты"];
+					check_user_data=false;
+			}
+			else {
+				ready=true;
+			}
+			
+			if(or.Delivery.selected.type!=1 && or.Delivery.selected.type!=3) {
+				if($('[name=delivery_address]').val().length==0) {
+					//toogleError("[name=delivery_address]", "Укажите адрес доставки", $('[name=delivery_address]').val().length);
+					error_list[error_list.length] = ["[name=delivery_address]", "Укажите адрес доставки"];
+					ready = false;
+				}
+			}
+			else {
+				$('[name=delivery_address]').val('');
+			}
+			toogleError(error_list);
+			if(!check_user_data) {
+				ready = false;
+			}
+
+			return ready;
+
+		},
+		order_sum: 0,
+		order_sale_sum: 0,
+		bonus_use_sum: 0,
+		bonus_add_sum: 0,
+		total_sum: 0,
+		Country: {
+			list:[],
+			selected: $('#selected_country').val(),
+			select: function(id) {
+				if(or.freeze) {
+					return false;
+				}
+				id = parseInt(id);
+				if(id!=or.Country.selected) {
+					or.Country.selected = id;
+					or.City.clear();
+					or.City.load();
+					or.Country.update();
+				}
+			},
+			update: function() { //обновляем с jquery
+				$('#selected_country').val(or.Country.selected);
+				$('.select_country').removeClass('active');
+				$('#choose-country-'+or.Country.selected).addClass('active');
+			},	
+		},
+		City: {
+			list: [],
+			selected: {
+				id: null,
+				name: '',
+				postal_code: 0,
+			},
+			select_postal_code: function(field_id) {
+				var $index = parseInt($('#'+field_id).val());
+				if(($index+"").length==6) {
+					if(or.City.selected.postal_code!=$index) {
+						or.City.selected.postal_code = $index;
+						$('#'+field_id).val($index);
+						or.Delivery.load();
+					}
+				}
+			},
+			load: function() {
+				if(or.freeze) {
+					return false;
+				}
+				jQuery(".city-chooser").autocomplete({
+					serviceUrl: '/order/get_cities/'+or.Country.selected,
+					minChars: 3,
+					delay: 600,
+					dataType: 'json',
+					onSelect: function (suggestion) {
+						or.City.select(suggestion.value, suggestion.data);
+					},
+					transformResult: function(response) {
+						return {
+							suggestions: $.map(response, function(dataItem) {
+								return { value: dataItem.name, data: dataItem.id };
+							})
+						};
+					},
+				});
+			},
+			select: function(name, id) {
+				if(or.freeze) {
+					return false;
+				}
+				if(id && or.City.selected.id!=id) {
+					or.City.selected.id = id;
+					or.City.selected.name = name;
+					or.City.selected.postal_code = 0;
+					or.City.update();
+					destroy_ya_map();
+					or.Delivery.load_types();
+				}
+			},
+			update: function() {
+
+				$('#city-field').val(or.City.selected.id);
+				$('#city-chooser').val(or.City.selected.name);
+				prez_city = or.City.selected.name;
+				if(prez_city.charAt(or.City.selected.name.length - 1) == "а"){
+					prez_city = prez_city.substring(0, prez_city.length - 1) + "у";
+				}
+				$('#prezent_for_city_name').text('в ' + prez_city);
+				$('#city-chooser').next('.field_error_msg').hide();
+
+				if(or.City.selected.postal_code==0) {
+					$('#client_index').val('');
+				}
+				
+				if(or.City.selected.id && or.City.selected.name) {
+					$('#clear-choose-of-city').show();
+				}
+				else {
+					$('#clear-choose-of-city').hide();
+				}
+			},
+			clear: function() {
+				or.City.selected.name='';
+				or.City.selected.id=null;
+
+				or.City.update();
+				or.Delivery.clear_types();
+			},
+		},
+		goPickpoint: function() {
+
+			if(or.Delivery.selected.type!=5) {
+				return false;
+			}
+
+			if($('#delivery_chooser').is(':visible')) {
+			$('#delivery_chooser').selectmenu('close');
+			}
+			if(typeof PickPoint != 'undefined') {
+			PickPoint.open(
+				function(result) {
+					or.City.selected.terminal = result.id;
+						if(result.cityname!=or.City.selected.name) {
+							$.ajax({
+								url: '/order/get_cities/'+or.Country.selected,
+								dataType: 'json',
+								data: { query: result.cityname },
+								success: function(d) {
+									or.City.selected.name = d[0].name;
+									or.City.selected.id = d[0].id;
+									or.City.selected.terminal = result.id;
+									or.City.update();
+									or.Delivery.update();
+								},
+							});
+						}
+					var go = result.cityname+', '+result.shortaddress
+					var terminal = or.City.selected.terminal || 0;
+					$('#terminal_pickpoint').val(terminal);
+					$('[name=delivery_address]').val(go);
+				}, {
+				city:or.City.selected.name,
+			});
+			}
+		},
+		Delivery: {
+			price: 0,
+			list: {
+				types: { },
+				values: { },
+			},
+			selected: {
+				type: null,
+				value: null,
+			},
+			select_type: function() {
+				var new_type;
+				if($(this).is('select')) {
+					new_type = parseInt($(this).val());
+				}
+				else {
+					new_type = parseInt($(this).attr('delivery_type_id'));
+				}
+				
+				if(or.Delivery.selected.type!=new_type || new_type==5) {
+					or.Delivery.selected.type = new_type;
+					or.goPickpoint();
+					or.Delivery.clear();
+					or.Delivery.load();
+				}
+			},
+			select: function() {
+				if(or.Delivery.selected.value != parseInt($(this).val())) {
+					or.Delivery.selected.value = parseInt($(this).val());
+					or.Delivery.get_info();
+					or.Delivery.update();
+					or.Payment.clear();
+					or.Payment.load();
+					
+					if(this.constructor === HTMLSelectElement && typeof myMap !== 'undefined') {
+						var result = ymaps.geoQuery(myMap.geoObjects)
+							.search('properties.delivery_id = '+or.Delivery.selected.value)
+							.then(function() {
+								result.getExtremeObject('top').events.fire('click');
+							});
+				}
+					
+				}
+			},
+			get_info: function() {
+
+				if(or.Delivery.selected.value) {
+
+					$.ajax({
+						url: "/order/ajax_get_delivery_info",
+						data: { 
+							delivery_id: or.Delivery.selected.value,
+							order_sum: or.order_sum,
+						},
+						success: function (response) {
+							$("#delivery-info-block").html(response);
+							if(or.Delivery.selected.type!=1) {
+								if(Object.keys(or.Delivery.list.values).length<=1 && or.Delivery.selected.type!=3){
+								$('#delivery-info-block').parent().parent().hide();
+								
+							}else{
+								$('#delivery-info-block').show();
+								$('#delivery-info-block').parent().parent().show();
+							}
+							}
+							else {
+								$("#delivery-info-block").hide();
+							}
+							var $dialog_map = $('.dialog-map');
+							$('.open-map').on('click', function(){
+
+								$dialog_map.dialog({
+									autoOpen: true,
+									width: 600,
+									modal: true,
+									draggable: false,
+									resizable: false,
+									dialogClass: 'ui-dialog-map',
+									show: {
+										effect: 'drop',
+										duration: 300
+									},
+									hide: {
+										effect: 'drop',
+										duration: 300
+									},
+									open: function(){
+										$('.ui-widget-overlay').on('click', function(){
+											$dialog_map.dialog('close');
+										});
+									},
+									close: function(){
+										$dialog_map.dialog('destroy');
+										$('.dialog-map .map').html('');
+									}
+								});
+								$.ajax({
+									url: "/order/get_delivery_map",
+									data: { delivery_id: or.Delivery.selected.value },
+									success: function(response) {
+										$('.dialog-map .map').html(response);
+									}
+								})
+							});
+						}
+					});
+				}
+			},
+			render_types: function() {
+			
+				$.each(or.Delivery.list.types,function(k,v) {
+				
+					if(!or.City.selected.postal_code && v.zip) {
+						or.City.selected.postal_code = v.zip;
+					}
+				
+					var html = '';
+					if($('#delivery_type_list').is("select")) {
+						html+='<option delivery_type_id="'+v.type_id+'" delivery_type_duration="'+v.duration+'" min_price="'+v.min_price+'" value="'+v.type_id+'">';
+						html+=v.type_name;
+						html+='</option>';
+					}
+					else {
+						html+= '<a href="javascript:void(0)" delivery_type_id="'+
+						       v.type_id+'" class="d_'+v.type_id+' delivery_select_type">';
+						html+=v.type_name;
+						html+='</a>';
+					}
+					$('#delivery_type_list').append(html);
+				});
+				if($('#delivery_type_list').is("select")) {
+					
+					$.widget( "custom.deliverytypeselect", $.ui.selectmenu, {
+						_setText: function (element, value) {
+							if (element == this.buttonText) {
+								this._setButtonText(element, value);
+							} else {
+								this._superApply(element, value);
+							}
+						},
+						_setButtonText: function (a,b) {
+							console.log();
+							a.html($('#ui-menu-item-delivery-'+$('[delivery_type_id]:selected').attr('delivery_type_id')).html());
+						},
+						_renderItem: function( ul, item ) {
+							var html_text = item.label;
+							html_text+=' ';
+							html_text+='<strong>';
+							html_text+='(';
+							if(item.element.attr('delivery_type_duration')!='null') {
+								html_text+=item.element.attr('delivery_type_duration');
+								html_text+=', ';
+							}
+							if(parseInt(item.element.attr('min_price'))>0) {
+								if(item.element.attr('delivery_type_id')==1) {
+									html_text+='от ';
+								}
+								html_text+=parseInt(item.element.attr('min_price'))+' руб.';
+							}
+							else {
+								html_text+='бесплатно';
+							}
+							html_text+=')';
+							html_text+='</strong>';
+							
+							if(item.element.attr('delivery_type_id')==5) {
+								if($('.repeat_pickpoint_inf').length && !$('.repeat_pickpoint_inf').hasClass('clone_repeat_pickpoint')) {
+									html_text+=$('.repeat_pickpoint_inf')
+										.clone()
+										.addClass('clone_repeat_pickpoint')
+										.css('display','inline-block')[0]
+										.outerHTML;
+								}
+							}
+							
+							return $('<li id="ui-menu-item-delivery-'+item.element.attr('delivery_type_id')+'">')
+							.addClass('ui-menu-item')
+							.append(html_text)
+							.appendTo(ul.css('overflow','inherit'));
+						}
+					});
+					
+					$('#delivery_type_list')
+						.deliverytypeselect()
+						.deliverytypeselect('refresh')
+						.on('deliverytypeselectchange',or.Delivery.select_type)
+						.trigger('deliverytypeselectchange');
+				}
+				else {
+					$('#delivery_type_list').children('a').bind('click',or.Delivery.select_type);
+					$('#delivery_type_list').children('a').first().click();
+				}
+			},
+			load_types: function() {
+
+				or.Delivery.clear_types();
+
+				if(or.City.selected.id) {
+					$.ajax({
+						url: '/order/get_delivery_types/'+or.City.selected.id,
+						dataType: 'json',
+						data: { country_id: or.Country.selected},
+						success: function(d) {
+
+							if(!Object.keys(d).length) {
+								toogleError('#city-chooser','К сожалению, доставки в этот город нет. Пожалуйста, выберите другой город',0);
+							}
+
+							or.Delivery.list.types = d;
+
+							or.Delivery.render_types();
+
+							or.Delivery.update();
+						},
+					});
+				}
+			},
+			load: function() {
+
+				or.Delivery.clear();
+
+				$.ajax({
+					url: '/order/get_deliveries/'+or.Delivery.selected.type,
+					dataType: 'json',
+					data: { city_id: or.City.selected.id, country_id: or.Country.selected, limit: or.limit, postal_code: or.City.selected.postal_code },
+					success: function(d) {
+						or.Delivery.list.values=d;
+
+						if(Object.keys(or.Delivery.list.values).length>1) {
+							var html = '<option value="null" disabled> -- Выберите пункт из списка -- </option>'
+							$('#delivery_chooser').append(html);
+						}
+
+						$.each(or.Delivery.list.values,function(k,v) {
+							var html = '';
+							html+='<option value="'+v.delivery_id+'">';
+							html+=v.delivery_name;
+							html+='</option>';
+							$('#delivery_chooser').append(html);
+						});
+
+						if(Object.keys(or.Delivery.list.values).length==1) {
+							or.Delivery.select.bind($('#delivery_chooser'))();
+						}
+
+						or.Delivery.update();
+					},
+				});
+			},
+			clear_types: function() {
+				or.Delivery.selected.type=null;
+				or.Delivery.list.types={};
+				or.Delivery.update();
+			},
+			clear: function() {
+				or.Delivery.selected.value=null;
+				or.Delivery.list.values={};
+
+				$('#delivery-info-block').hide();
+
+				or.Delivery.update();
+			},
+			calc_price: function(price) {
+				or.Delivery.price=parseInt(price);
+				var free = parseInt($('#free_shipping_sum').val());
+
+				if(free) {
+					or.Delivery.price-=free;
+				}
+
+				if(or.Delivery.price<0) {
+					or.Delivery.price=0;
+				}
+				or.total_sum=or.order_sum + or.Delivery.price - or.bonus_use_sum - or.order_sale_sum;
+			},
+			update: function() {
+				if(or.Delivery.selected.type) {
+					$('.delivery_select_type').removeClass('active');
+					$('.delivery_select_type[delivery_type_id='+or.Delivery.selected.type+']').addClass('active');
+
+					if(or.Delivery.selected.type==4) {
+						$('#rus_post_block_fio').show();
+					}
+					else {
+						$('#rus_post_block_fio').hide();
+					}
+
+					if(or.Delivery.selected.type==2 && (or.City.selected.id==21 || or.City.selected.id==2)) {
+						$('#KAD').show();
+					}
+					else {
+						$('#KAD').hide();
+					}
+
+					if(or.Delivery.selected.type!=1 && or.Delivery.selected.type!=3) {
+						$('#shiping-address').show();
+					}
+					else {
+						$('#shiping-address').hide();
+					}
+
+					if(or.Delivery.selected.type==5) {
+						$('#repeat_pickpoint').show();
+					}
+					else {
+						$('#repeat_pickpoint').hide();
+					}
+
+					if(or.Delivery.selected.type==1) {
+						if(typeof ymaps!=='undefined') {
+							ymaps.ready(init_ya_map);
+				}
+					}
+					else {
+						destroy_ya_map();
+					}
+
+				}
+				
+				if(or.Delivery.selected.value) {
+					var dv = or.Delivery.list.values;
+					var d_name=null;
+					var d_price=0;
+					var d_price_ot=0;
+					var d_duration=0;
+
+					for(var i in dv){
+						if(parseInt(dv[i].delivery_id)==or.Delivery.selected.value) {
+							d_name=dv[i].delivery_name;
+							d_price_ot=dv[i].ot;
+							d_duration=dv[i].duration;
+							if(or.order_sum>=parseInt(dv[i].ot)) {
+								d_price=0;
+							}
+							else {
+								d_price=dv[i].delivery_price;
+							}
+						}
+					}
+					d_price_ot = Math.ceil(d_price_ot/1000) * 1000;
+					if(d_name) {
+						$('#selected_address').html(d_name);
+						or.Delivery.calc_price(d_price);
+						if(or.Delivery.price == 0){
+							$('#delivery_count').text('Бесплатно');
+							$('#delivery_count_text').hide();
+							if(!!$('#delivery_count_text_top')){
+								$('#delivery_count_text_top').html('доставка бесплатно');
+							}
+						}else{
+							$('#delivery_count').html(or.Delivery.price+' р.');
+							$('#delivery_count_text').html('бесплатная доставка от <span class="bold">'+d_price_ot+'</span> р.').show();
+							if(!!$('#delivery_count_text_top')){
+								$('#delivery_count_text_top').html('бесплатная доставка от <span class="bold">'+d_price_ot+'</span> р.');
+							}
+						}
+						$('#all_price').text(or.order_sale_sum);
+						$('#used_bonus_count').text(or.bonus_use_sum);
+						$('#add_bonus_summ').text(or.bonus_add_sum);
+						if(or.bonus_use_sum>0) {
+							$('#bonus_info_order_block').show();
+						}
+						else {
+							$('#bonus_info_order_block').hide();
+						}
+						if(or.bonus_add_sum>0) {
+							$('#bonus_add_order_block').show();
+						}
+						else {
+							$('#bonus_add_order_block').hide();
+						}
+						$('#total_count').text(or.total_sum);
+						if(!!$('#total_count_top')){
+							$('#total_count_top').text(or.total_sum);
+						}
+						if ($('#order_info_block').find('.order_info_block')){
+						$('.order_info_block').show();	
+						}else{
+						$('#order_info_block').show();
+					}
+					}
+					
+					if(d_duration) {
+						$('#delivery_duration_block').show();
+						$('#delivery_duration_text').html(d_duration);
+					}
+					else {
+						$('#delivery_duration_block').hide();
+					}
+				}
+				else {
+					if ($('#order_info_block').find('.order_info_block')){
+						$('.order_info_block').hide();	
+					}
+					else {
+						$('#order_info_block').hide();
+					}
+				}
+
+				if(Object.keys(or.Delivery.list.types).length==0) {
+					$('#delivery_type_list').empty();
+					$('#delivery_payment_block').hide();
+				}
+				else {
+					$('#delivery_payment_block').show();
+				}
+
+				if(Object.keys(or.Delivery.list.values).length==0) {
+					$('#delivery_chooser').empty();
+					$('#delivery_block').hide();
+				}
+				else {
+					$('#delivery_chooser').selectmenu().selectmenu('refresh').on('selectmenuchange',or.Delivery.select).on('selectmenuopen',or.goPickpoint);
+					
+					if(Object.keys(or.Delivery.list.values).length==1) {
+						$('#delivery_chooser option:first').hide();
+						$('#delivery_chooser').selectmenu("widget").hide();
+					}
+					else {
+						$('#delivery_chooser').selectmenu("widget").show();
+					}
+					$('#delivery_block').show();
+		//			$('#delivery_chooser').trigger('selectmenuchange');
+					if(Object.keys(or.Delivery.list.values).length==1) {
+						
+					}
+				}
+			},
+		},
+		Payment: {
+			list: { },
+			selected: null,
+			type: 'cash',
+			select: function(val) {
+				or.Payment.selected = parseInt(val);
+
+				var yandex_kassa = $('#payment-method-'+val).attr('yandex_kassa');
+				if(yandex_kassa!='false') {
+					$('#yandex_sum').val($('#total_count').text());
+					$('#yandex_paytype').val(yandex_kassa);
+
+					or.Payment.type='yandex';
+				}
+				else {
+					or.Payment.type='cash';
+				}
+			},
+			load: function() {
+				//сверяет видимый список (не рисует заново!)
+				$.ajax({
+					url: '/order/get_payments/'+or.Delivery.selected.value,
+					dataType: 'json',
+					success: function(d) {
+						or.Payment.list=d;
+
+						$.each(or.Payment.list,function(k,v) {
+							$('#payment-method-'+v.id).parent('label').show();
+							if(v.checked) {
+								$('#payment-method-'+v.id).attr('selected','selected');
+								or.Payment.select(v.id);
+							}
+						});
+						if($('#payment-methods').is('select')) {
+							$('#payment-methods').selectmenu().selectmenu('refresh');
+						}
+					},
+				});
+			},
+			clear: function() {
+				$('#payment-methods label').hide();
+			},
+		},
+	};
+});
+
+/* PHP */
+function in_array(needle, haystack, strict) {   
+    var found = false, key, strict = !!strict;
+ 
+    for (key in haystack) {
+        if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
+            found = true;
+            break;
+        }
+    }
+ 
+    return found;
+}
+
+
+function isset () {
+	var a=arguments, l=a.length, i=0;
+	 
+	if (l===0) {
+	    return true; 
+	}
+	 
+	while (i!==l) {
+	    if (typeof(a[i])=='undefined' || a[i]===null) { 
+	        return false; 
+	    } else { 
+	        i++; 
+	    }
+	}
+	return true;
+}
+
+function array_key_exists ( key, search ) {
+	if( !search || (search.constructor !== Array && search.constructor !== Object) ){
+		return false;
+	}
+
+	return search[key] !== undefined;
+}
+function sendMailToCarrot(CarMail,del){
+	carrotquest.identify({'$email':document.getElementById(CarMail).value});
+	$('.send_mail_active').removeClass('send_mail_active');
+	if(del){
+		$('.cq-popup-bg').remove();
+		$('.cq-popup-body').remove();
+	}
+}
+function carrotLookedGoods(name,url,price,img) {
+	if(typeof carrotquest =='undefined') {
+		return;
+	}
+	carrotquest.track('$product_viewed', {
+		"$name": name,
+		"$url": url,
+		"$amount": price,
+		"$img": img,
+	});
+}
+
+function is_array( mixed_var ) {
+	return ( mixed_var instanceof Array );
+}
+
+function message(title, mess){
+
+	var a = mess;
+
+	var str='';
+	
+	if (is_array(a)){
+		for (var i in a){
+			str+=a[i]+'<br>';
+		}	
+	}
+	else{
+		str=a;
+	}
+	
+	var mes_id='message-'+Math.round(Math.random()*100000);
+	
+	var html = '';
+	
+	html+='<div class="dialog-callback" id="'+mes_id+'">';
+	
+	html+='<div class="title">';
+	html+=title;
+	html+='</div>';
+
+	html+='<div class="form">';
+	
+	html+='<div class="item">';
+	html+=str;
+	html+='</div>';
+	html+='</div>';
+	html+='</div>';
+	
+	$('body').append(html);
+	
+	$('#'+mes_id ).dialog({
+		modal: true,
+		width: 350,
+		dialogClass: 'ui-dialog-form',
+		buttons: {
+			Ok: function() {
+				$(this).dialog( "close" );
+				$('#'+mes_id).remove();
+			}
+		},
+		open: function() {
+			$('.ui-widget-overlay').on('click', function(){
+				$('#'+mes_id).dialog( "close" );
+				$('#'+mes_id).remove();
+			});
+		},
+	});
+	
+	$('#'+mes_id).dialog("open");
+	
+	
+	
+}
+
+var myMap;
+
+function destroy_ya_map() {
+	if(or.ya_map_init) {
+		myMap.destroy();
+	}
+	or.ya_map_init=false;
+	$('#map').remove();
+}
+function init_ya_map() {
+	if(!or.ya_map_init) {
+		var deliveries = or.Delivery.list.values;
+		if(!Object.keys(deliveries).length) {
+			setTimeout(init_ya_map,100);
+			return false;
+		}
+		$('#delivery_block').append('<div class="popup_ya_map" style="display: none;" id="map"></div>');
+		
+//		$('.delivery_select').hide();
+		$('.popup_ya_map').show();
+		$('.popup_ya_map').css('position','relative');
+		$('.popup_ya_map').css('width','100%');
+		$('.popup_ya_map').css('height','300px');
+		$('.popup_ya_map').css('float','left');
+		
+		var center = [55.76, 37.64];
+		
+		if(or.City.selected.id==2) {
+			center = [60,30.2];
+		}
+		
+		myMap = new ymaps.Map("map", {
+				center: center,
+				zoom: 10,
+				controls: ['zoomControl']
+			}, {
+				searchControlProvider: 'yandex#search'
+			});
+		$.each(deliveries, function(k,v) {
+			if(v.settings) {
+				var np = new ymaps.Placemark([v.settings.coords[1],v.settings.coords[0]], {
+					balloonContent: '<div class="delivery-info map"><span class="delivery_info_map_title">'+v['delivery_name']+'</span>'+v['delivery_info']+'</div>',
+					delivery_id: v['delivery_id'],
+				}, {
+					iconLayout: 'default#image',
+					iconColor: '#f8626c',
+					iconImageHref: '/i/cart/map_pointer.png',
+					iconImageSize: [31,45],
+				});
+				np.events.add([
+					'click'
+				], function (e) {
+					$('#delivery_chooser').val(parseInt(e.get('target')['properties'].get('delivery_id'))).selectmenu('refresh');
+					or.Delivery.select.bind($('#delivery_chooser'))();
+				});
+
+				myMap.geoObjects.add(np);
+			}
+			else {
+				console.error(v);
+			}
+		});
+		or.ya_map_init=true;
+		setTimeout(function(){
+		$('#delivery_chooser').trigger('selectmenuchange');
+		},500);
+	}
+	else {
+		$('#map').show();
+	}
+}
+
+function changeCartProductCount(elem){
+	if($(elem).val()<2){
+		$(elem).parent().find('.minus').css('visibility','hidden');
+	}else{
+		$(elem).parent().find('.minus').css('visibility','inherit');
+	}
+}
+
+function carrotClousPopup(){
+	$('#cq-popup-bg').css('display','none');
+	$('#cq-popup').css('display','none');
+}
+
+function timer_for_gift(time, object){
+	var sek= time;
+
+	var str_sek = parseInt((sek%3600)%60);
+	var str_min = parseInt((sek%3600)/60);
+	var str_aur = parseInt(sek/3600);
+	
+	if (str_sek<10){
+	str_sek = '0'+str_sek
+	}
+	if (str_min<10){
+	str_min = '0'+str_min
+	}
+	if (str_aur<10){
+	str_aur = '0'+str_aur
+	}
+	
+	var str = str_aur+':'+str_min+':'+str_sek;
+	$(object).text(str);
+	return setTimeout(function(){
+		timer_for_gift(time-1, object)
+	},1000);
+}

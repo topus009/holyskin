@@ -1,0 +1,230 @@
+/* ================================= POP_UP ================================= */
+.pop_up_topolov {
+  -webkit-box-shadow: 0 0 0 100vw rgba(0, 0, 0, 0.65);
+  -moz-box-shadow: 0 0 0 100vw rgba(0, 0, 0, 0.65);
+  position: fixed;
+  top: calc(50vh - 198px);
+  right: 0;
+  left: 0;
+  width: 580px;
+  height: 359px;
+  margin: 0 auto;
+  padding-top: 36px;
+  padding-left: 22px;
+  z-index: 999;
+  -webkit-transform: rotate(0deg);
+          transform: rotate(0deg);
+  border-left: 6px solid #3ebef0;
+  border-top-right-radius: 100px;
+  background-color: #fffdfd;
+  background-image: radial-gradient(circle at 2px 2px, #EDECEC 1px, transparent 2px), radial-gradient(circle at 11px 11px, #EDECEC 1px, transparent 2px);
+  background-repeat: repeat;
+  background-size: 18px 18px;
+  font-family: 'Roboto', serif;
+  -webkit-animation: show_pop_up_animation 2.5s;
+          animation: show_pop_up_animation 2.5s;
+}
+@-webkit-keyframes show_pop_up_animation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.pop_up_topolov_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: black;
+  opacity: 0.35;
+  z-index: 998;
+}
+@keyframes show_pop_up_animation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.pop_up_topolov .pop_up_close {
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+}
+.pop_up_topolov .pop_up_close:after,
+.pop_up_topolov .pop_up_close:before {
+  position: absolute;
+  top: 6px;
+  width: 16px;
+  height: 1px;
+  background-color: #C0C0C0;
+  content: "";
+}
+.pop_up_topolov .pop_up_close:after {
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+}
+.pop_up_topolov .pop_up_close:before {
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+}
+.pop_up_topolov .title {
+  height: 18px;
+  margin-top: -2px;
+  margin-left: -2px;
+  font-family: 'Roboto', serif;
+  font-size: 20px;
+  line-height: 18px;
+}
+.pop_up_topolov .title,
+.pop_up_topolov .form_slogan {
+  color: #4a4a4a;
+}
+.pop_up_topolov .styled_block {
+  position: relative;
+  height: 50px;
+  margin-top: 4px;
+  margin-bottom: 43px;
+  font-family: 'Roboto Slab', serif;
+  font-size: 56px;
+  line-height: 0.79;
+}
+.pop_up_topolov .styled_block .styled_text {
+  position: absolute;
+  color: #ff9da5;
+  font-weight: bold;
+}
+.pop_up_topolov .styled_block .styled_text_shadow {
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: #f5bdba;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+}
+/* ========================================================================== */
+/* ================================= ПАНДА ================================== */
+.pop_up_topolov .animated {
+  position: absolute;
+  top: 33px;
+  right: 161px;
+}
+.pop_up_topolov .animated .sprites {
+  position: absolute;
+  top: -41px;
+  left: -11px;
+  width: 199px;
+  height: 154px;
+  background: url(./img/sprites1.png) no-repeat;
+  -webkit-animation: like_gif 3s steps(3) infinite;
+          animation: like_gif 3s steps(3) infinite;
+}
+@-webkit-keyframes like_gif {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -924px;
+  }
+}
+@keyframes like_gif {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 -924px;
+  }
+}
+.hide {
+  display: none;
+}
+/* ========================================================================== */
+/* ================================= ФОРМА ================================== */
+.pop_up_topolov .form_subscribe {
+  margin-top: 4px;
+}
+.pop_up_topolov .form_subscribe input {
+  font-size: 14px;
+}
+.pop_up_topolov .form_subscribe input:focus {
+  outline: none;
+}
+.pop_up_topolov .form_subscribe .send_email {
+  width: 260px;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid #cccccc;
+  border-width: 1px;
+  background-color: #f5f5f5;
+  color: #8c8c8c;
+}
+.pop_up_topolov .form_subscribe .form_subscribe_submit {
+  height: 40px;
+  margin-left: -6px;
+  padding-right: 28px;
+  padding-left: 20px;
+  border: solid 1px #eea5ab;
+  background-color: #ffc3c8;
+  color: white;
+  cursor: pointer;
+}
+/* ========================================================================== */
+/* ================================= CИНИЙ_БЛОК ============================= */
+.pop_up_topolov .blue_block {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  width: calc(100% + 22px);
+  height: 116px;
+  margin-top: 31px;
+  margin-left: -22px;
+  background-color: #3ebef0;
+  font-size: 12px;
+  line-height: 1.17;
+  text-align: center;
+  box-shadow: 2.1px 3.4px 5px 0.1px rgba(101, 101, 101, 0.27);
+}
+.pop_up_topolov .blue_block div {
+  width: 25%;
+  height: 100%;
+}
+.pop_up_topolov .blue_block p {
+  color: #efefef;
+}
+.pop_up_topolov .blue_block .item_1 {
+  margin-top: 19px;
+  margin-left: 4px;
+}
+.pop_up_topolov .blue_block .item_2 {
+  margin-top: 18px;
+  margin-left: -5px;
+}
+.pop_up_topolov .blue_block .item_3 {
+  margin-top: 20px;
+  margin-left: -7px;
+}
+.pop_up_topolov .blue_block .item_4 {
+  margin-top: 14px;
+  margin-left: -3px;
+}
+.pop_up_topolov .blue_block .item_1 p {
+  margin-top: 10px;
+  margin-left: -3px;
+}
+.pop_up_topolov .blue_block .item_2 p {
+  margin-top: 9px;
+}
+.pop_up_topolov .blue_block .item_3 p {
+  margin-top: 10px;
+}
+.pop_up_topolov .blue_block .item_4 p {
+  margin-top: 4px;
+}
+/* ========================================================================== */

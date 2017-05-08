@@ -1,0 +1,43 @@
+@font-face {
+    font-family: 'Days';
+    src: url('fonts/days-webfont.eot');
+    src: url('fonts/days-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/days-webfont.woff') format('woff'),
+         url('fonts/days-webfont.ttf') format('truetype'),
+         url('fonts/days-webfont.svg#daysregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Cuprum';
+    src: url('fonts/cuprum-regular_0-webfont.eot');
+    src: url('fonts/cuprum-regular_0-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/cuprum-regular_0-webfont.woff') format('woff'),
+         url('fonts/cuprum-regular_0-webfont.ttf') format('truetype'),
+         url('fonts/cuprum-regular_0-webfont.svg#cuprumregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face{
+	font-family:'Glober';
+	src :url('/css/fonts/Fontfabric_Glober.Regular.otf');
+}
+@font-face{
+	font-family:'Glober';
+	font-weight:900;
+	src :url('/css/fonts/Fontfabric_Glober.Bold.otf');
+}
+@font-face{
+	font-family:'GloberBlack';
+	src :url('/css/fonts/Fontfabric_Glober.Black.otf');
+}
+@font-face{
+	font-family:'Glober';
+	font-weight:bold;
+	src :url('/css/fonts/Fontfabric_Glober.Bold.otf');
+}
+@font-face{
+	font-family:'Glober';
+	font-style: italic;
+	src :url('/css/fonts/Fontfabric_Glober.Regular.Italic.otf');
+}

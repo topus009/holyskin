@@ -1,0 +1,5 @@
+
+(function() {
+  console.warn('Your Convead account is suspended! Please visit https://app.convead.io and check your billing details.')
+}).call(this);
+  

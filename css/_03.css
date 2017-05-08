@@ -1,0 +1,8 @@
+:root .site-content>.slide-dock-on,
+:root .social {
+  display: none !important;
+}
+
+:root *[zsmp18l][hidden] {
+  display: none !important;
+}
