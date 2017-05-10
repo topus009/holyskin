@@ -57,7 +57,8 @@ function favoriteCount() {
 
 function favoriteCount_cookie() {
   jQuery.ajax({
-    url: './ajax/favorites_cookie_count',
+    // url: '/ajax/favorites_cookie_count',
+    url: 'https://topus009.github.io/holyskin/ajax/favorites_cookie_count',
     type: "GET",
   }).success(function(data) {
     var vrem = '(0)';
