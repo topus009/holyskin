@@ -1,5 +1,5 @@
 .pop_up_topolov {
-  position: absolute;
+  position: fixed;
   top: calc(50vh - 198px);
   right: 0;
   left: 0;
