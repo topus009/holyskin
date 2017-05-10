@@ -716,7 +716,7 @@
 .site-header .menu > ul > li li a:hover,.cart-list li.del a:hover{text-decoration:underline}
 .site-header .cabinet{float:right;text-align:right;margin-right:10px}
 .site-header .cabinet a{font-size:16px;color:#000;font-family:'Robotos';font-weight:normal;text-decoration:none}
-.site-header .cabinet a.login:before{background:url(/i/sprite_new.png) -67px 0 no-repeat;content:'';display:inline-block;height:26px;margin-right:6px;vertical-align:middle;width:26px}
+.site-header .cabinet a.login:before{background:url(../i/sprite_new.png) -67px 0 no-repeat;content:'';display:inline-block;height:26px;margin-right:6px;vertical-align:middle;width:26px}
 .site-header .cabinet a:hover{text-decoration:underline}
 .cart-list li.info .title a{color:#2b2b2d}
 .site-header .cabinet i{background:#000;display:inline-block;height:13px;margin:0 10px;vertical-align:middle;width:1px;border-left:1px solid #bfbfbf;border-right:1px solid #dfdfdf;margin-top:-2px}
@@ -736,11 +736,11 @@
 .site-header .cart .box .count{color:#f9636d;font-size:16px;text-decoration:underline}
 .site-header .cart .title{font-size:16px;font-weight:700;float:right;width:141px;text-align:left;color:#000;text-decoration:none;font-family:'Robotos';padding-top:11px}
 .site-header .cart a:hover{text-decoration:underline}
-.site-header .cart .cart_logo{background:url(/i/header-cart.png) no-repeat;float:left;height:75px;width:81px;margin-right:8px;}
+.site-header .cart .cart_logo{background:url(../i/header-cart.png) no-repeat;float:left;height:75px;width:81px;margin-right:8px;}
 .page-delivery-cart{width: 36%;display: block;clear: both;font-weight: bold;line-height: 73px;margin: 5px auto;position: relative;font-size: 20px;}
 .site-header .delpay > a{color:#000;display:block;font-size:14px;font-weight:500;text-decoration:none;font-family:'Robotos'}
 .site-header .delpay > a:after{content:'';display:inline-block;margin-left:20px;vertical-align:middle;width:0;height:0;border:5px solid transparent;border-top:6px solid #f9636d}
-.site-header .delpay > a:before{background:url(/i/sprite_new.png) 0 0 no-repeat;content:'';display:inline-block;height:23px;margin-right:6px;vertical-align:middle;width:34px;margin-bottom:3px}
+.site-header .delpay > a:before{background:url(../i/sprite_new.png) 0 0 no-repeat;content:'';display:inline-block;height:23px;margin-right:6px;vertical-align:middle;width:34px;margin-bottom:3px}
 .site-header .delpay{float:right;position:relative}
 .site-header .foot{background:#f9636d;height:57px;min-width:1210pxl;border-bottom:3px solid #f5e000}
 .site-header .head{background:url(/i/bg_header_line.png) repeat-x;border-bottom:1px solid #e5e2e2;height:37px;min-width:1210px;position:relative;z-index:30;line-height:37px}
